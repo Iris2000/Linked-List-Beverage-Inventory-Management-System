@@ -51,10 +51,7 @@ void add()    //Add record
 		fflush(stdin);
 		cout<<"\nEnter the supplier's name: ";
 		getline(cin, supplier);
-		
-		cout<<"beverage: "<<beverage.length()<<endl;
-		cout<<"supplier: "<<supplier.length()<<endl;
-		cout<<supplier<<endl;
+	
 		
 		for(int i=0; i<beverage.length();i++){
 			beverage[i] = toupper(beverage[i]);
