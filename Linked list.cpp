@@ -6,6 +6,7 @@
 #include<cctype>
 #include<sstream>
 #include<string>
+#include<cstring>
 
 using namespace std;
 bool check = true;
@@ -22,11 +23,17 @@ struct node    //structure of the node
 
 void add()    //Add record
 {
+	node *prev=NULL;
+	node *current=NULL;
 	bool check = true;
+	string beverage,supplier;
+	int qty;
 	char con;
 	cout<<"You are currently in the add data page!\n";
 
 	do{
+		prev =head;
+		current =head;
 		if(con=='Y')
 		{
 			system("cls");
@@ -38,41 +45,68 @@ void add()    //Add record
 		}
 		node *p;
 		p=new node;
-
-		cout<<"\nEnter the name of beverage: ";
-		getline(cin, p->name);
-		fflush(stdin);
-		cout<<"\nEnter price of beverage(RM 00.00): RM ";
-		cin>>p->price;
-		fflush(stdin);
-		cout<<"\nEnter the quantity of beverage: ";
-		cin>>p->quan;
-		cout<<"\nEnter the supplier's name: ";
-		cin.ignore();
-		getline(cin, p->supName);
 		
+		cout<<"\nEnter the name of beverage: ";
+		getline(cin, beverage);
 		fflush(stdin);
-		p->next=NULL;
-
-		if(check)
-		{
-			head = p;
-			lastptr = p;
-			check = false;
+		cout<<"\nEnter the supplier's name: ";
+		getline(cin, supplier);
+		
+		cout<<"beverage: "<<beverage.length()<<endl;
+		cout<<"supplier: "<<supplier.length()<<endl;
+		cout<<supplier<<endl;
+		
+		for(int i=0; i<beverage.length();i++){
+			beverage[i] = toupper(beverage[i]);
 		}
-		else
-		{
-			lastptr->next=p;
-			lastptr=p;
+		for(int j=0; j<supplier.length();j++){
+			cout<<supplier[j]<<endl;
+			supplier[j]= toupper(supplier[j]);
 		}
-			cout<<endl<<"Record Saved.\nWould you like to add another record? [Y/N]\n";
+		while(current != NULL && current->name != beverage && current->supName != supplier) {
+				prev = current;
+				current = current->next;
+			}
+		if(current != NULL){
+			cout<<"\nEnter latest price of beverage\nPrevious price[RM "<<current->price<<" ] :RM ";
+			cin>>current->price;
+			fflush(stdin);
+			cout<<"\nEnter the quantity of beverage [ "<<current->quan<<"  instock] : ";
+			cin>>qty;
+			
+			current->quan = qty+current->quan;
+		}else{
+			fflush(stdin);
+			cout<<"\nEnter price of beverage(RM 00.00): RM ";
+			cin>>p->price;
+			fflush(stdin);
+			cout<<"\nEnter the quantity of beverage: ";
+			cin>>p->quan;
+			
+			p->name = beverage;
+			p->supName = supplier;
+			p->next=NULL;
+			if(check)
+			{
+				head = p;
+				lastptr = p;
+				check = false;
+			}
+			else
+			{
+				lastptr->next=p;
+				lastptr=p;
+			}
+		}
+		
+		cout<<endl<<"Record Saved.\nWould you like to add another record? [Y/N]\n";
+		cin >> con;
+		con = toupper(con);
+		while(con != 'Y' && con!= 'N'){
+			cout<<endl<<"Invalid input.\nPlease enter again.[Y/N]\n";
 			cin >> con;
 			con = toupper(con);
-			while(con != 'Y' && con!= 'N'){
-				cout<<endl<<"Invalid input.\nPlease enter again.[Y/N]\n";
-				cin >> con;
-				con = toupper(con);
-			}
+		}
 	} while(con=='Y');
 	checkAdd = true;
 }
@@ -101,7 +135,7 @@ void view()   //view record list
 			cout<<current->price;
 			cout<<"\nQuantity: ";
 			cout<<current->quan;
-			cout<<"\nEnter the supplier's name: ";
+			cout<<"\nSupplier's name: ";
 		    cout<<current ->supName;
 			cout<<"\n-----------------------------\n";
 			current = current->next;
@@ -312,29 +346,22 @@ void total_amount_beverage(){
 	prev=head;
 	current=head;
 
-	if(current == NULL){
+	cout<<"Beverages\t\t\tPrice\t\t\tQuantity\t\t\tSub-total\t\tSupplier's name'"<<endl;
+	cout<<"\n-----------------------------------------------------------------------------------------------------------------------------------------\n";
+	
+	while (current!= NULL) {
+		double price = atof(current->price.c_str());
+		int qty = current->quan;
 		
-		cout<<"\nThere are no record in the list.\n";
-	}
-	else{
-		
-		cout<<"Beverages\t\t\tPrice\t\t\tQuantity\t\t\tSub-total\t\tSupplier's name'"<<endl;
+		subtotal = price*qty;
+		total = total+subtotal;
+		cout<<current->name<<"\t\t\t\t$ "<<price<<"\t\t\t"<<qty<<"\t\t\t\t$ "<<subtotal<<"\t\t\t"<<current->supName;
 		cout<<"\n-----------------------------------------------------------------------------------------------------------------------------------------\n";
-		
-		while (current!= NULL) {
-			double price = atof(current->price.c_str());
-			int qty = current->quan;
-			
-			subtotal = price*qty;
-			total = total+subtotal;
-			cout<<current->name<<"\t\t\t\t$ "<<price<<"\t\t\t"<<qty<<"\t\t\t\t$ "<<subtotal<<"\t\t\t"<<current->supName;
-			cout<<"\n-----------------------------------------------------------------------------------------------------------------------------------------\n";
-			current = current->next;
-		}
-		
-		cout<<"Total: RM"<<total<<endl;
-		cout<<"-----------------------------------------------------------------------------------------------------------------------------------------\n";
+		current = current->next;
 	}
+	
+	cout<<"Total: RM"<<total<<endl;
+	cout<<"-----------------------------------------------------------------------------------------------------------------------------------------\n";
 	cout<<"\nDouble Press 'ENTER' return to previous page..."<<endl;
 	getch();
 }
@@ -345,6 +372,11 @@ void supplier(){
 	node *current=NULL;
 	char con;
 	double total=0;
+	string name, beverage;
+//	char array[30];
+	string array[30];
+	int i=0;
+	bool find = false;
 	
 	cout<<"Supplier list: "<<endl;
 	
@@ -356,18 +388,37 @@ void supplier(){
 		cout<<"\nThere are no record in the list.\n";
 	}
 	else{
-		
-		cout<<"Supplier's name"<<endl;
-		cout<<"-------------------\n";
-		
-		while (current!= NULL) {
-			total = total+1;
-			cout<<total<<". "<<current->supName<<endl;
+		while(current!=NULL){
+			find = false;
+			name= current->supName;
+			for (int j = 0; j < name.length(); j++) {
+				name[j] = toupper(name[j]);
+			}
+			
+			for (int k = 0; k < 30; k++) {
+				if (array[k] == name) {
+					find = true;
+				}
+			}
+			
+			if (!find) {
+				array[i] = name;
+				cout << "\n1. " << array[i];
+				beverage=current->name;
+				for (int y=0; y<=name.length()+1;y++){
+					beverage[y]=toupper(beverage[y]);
+				}
+				cout <<" "<<beverage;
+			}else{
+				beverage = current->name;
+				for (int y=0; y<=name.length();y++){
+					beverage[y]=toupper(beverage[y]);
+				}
+				cout<<" / "<<beverage;
+			}
+			i++;
 			current = current->next;
-		}
-		cout<<"-------------------\n";
-		cout<<"Total Supplier: "<<total<<endl;
-		
+		} 
 	}
 	cout<<"\nDouble Press 'ENTER' return to previous page..."<<endl;
 	getch();
@@ -378,31 +429,24 @@ void beverage(){
 	node *prev=NULL;
 	node *current=NULL;
 	char con;
-	double total=0;
+	int total=0, num=0;
 	
 	cout<<"Beverage list: "<<endl;
 	
 	prev=head;
 	current=head;
-
-	if(current == NULL){
 		
-		cout<<"\nThere are no record in the list.\n";
+	cout<<"\nBeverages |  Price"<<endl;
+	cout<<"-------------------\n";
+	
+	while (current!= NULL) {
+		num++;
+		total = total+1;
+		cout<<num<<". "<<current->name<<" |  RM"<<current->price<<endl;
+		current = current->next;
 	}
-	else{
-		
-		cout<<"\nBeverages |  Price"<<endl;
-		cout<<"-------------------\n";
-		
-		while (current!= NULL) {
-			total = total+1;
-			cout<<total<<". "<<current->name<<" |  RM"<<current->price<<endl;
-			current = current->next;
-		}
-		cout<<"-------------------\n";
-		cout<<"Total Beverages: "<<total<<endl;
-		
-	}
+	cout<<"-------------------\n";
+	cout<<"Total Beverages: "<<total<<endl;
 	cout<<"\nDouble Press 'ENTER' return to previous page..."<<endl;
 	getch();
 }
@@ -418,25 +462,18 @@ void supplier_N_beverage(){
 	
 	prev=head;
 	current=head;
-
-	if(current == NULL){
 		
-		cout<<"\nThere are no record in the list.\n";
+	cout<<"Supplier's name\t\t\t\tProduct"<<endl;
+	cout<<"-------------------\n";
+	
+	while (current!= NULL) {
+		total = total+1;
+		cout<<total<<". "<<current->supName<<"\t\t\t\t("<<current->name<<")"<<endl;
+		current = current->next;
 	}
-	else{
-		
-		cout<<"Supplier's name\t\t\t\tProduct"<<endl;
-		cout<<"-------------------\n";
-		
-		while (current!= NULL) {
-			total = total+1;
-			cout<<total<<". "<<current->supName<<"\t\t\t\t("<<current->name<<")"<<endl;
-			current = current->next;
-		}
-		cout<<"-------------------\n";
-		cout<<"Total Supplier: "<<total<<endl;
-		
-	}
+	cout<<"-------------------\n";
+	cout<<"Total Supplier: "<<total<<endl;
+	
 	cout<<"\nDouble Press 'ENTER' return to previous page..."<<endl;
 	getch();
 }
@@ -446,40 +483,32 @@ void beverage_instock(){
 	node *prev=NULL;
 	node *current=NULL;
 	char con;
-	int total=0, subtotal;
+	int total=0, subtotal, num=0;
 	
 	cout<<"Beverage in stock: "<<endl;
 	
 	prev=head;
 	current=head;
-
-	if(current == NULL){
+	cout<<"\nBeverages"<<endl;
+	cout<<"-------------------\n";
+	
+	while (current!= NULL) {
+		subtotal = current->quan;
+		if(subtotal > 0){
+			num++;
+			total = total+subtotal;
+			cout<<num<<". "<<current->name<<" [ "<<subtotal<<" ] QTY"<<endl;
+			current = current->next;
+		}
 		
-		cout<<"\nThere are no record in the list.\n";
 	}
-	else{
-		
-		cout<<"\nBeverages"<<endl;
+	if(total>0){
 		cout<<"-------------------\n";
-		
-		while (current!= NULL) {
-			subtotal = current->quan;
-			if(subtotal > 0){
-				total = total+subtotal;
-				cout<<total<<". "<<current->name<<"\t[ "<<subtotal<<" ] QTY"<<endl;
-				current = current->next;
-			}
-			
-		}
-		if(total>0){
-			cout<<"-------------------\n";
-			cout<<"Total Beverage in stock: "<<total<<endl;
-		}else{
-				cout<<"\nThere are no record in the list.\n";
-		}
-		
-		
+		cout<<"Total Beverage in stock: "<<total<<endl;
+	}else{
+			cout<<"\nThere are no record in the list.\n";
 	}
+	
 	cout<<"\nDouble Press 'ENTER' return to previous page..."<<endl;
 	getch();
 }
@@ -488,7 +517,16 @@ void beverage_instock(){
 void report()  // view report
 {
 	char x;
-	do{
+	node *prev=NULL;
+	node *current=NULL;
+	prev=head;
+	current=head;
+	if(current == NULL){
+		
+		cout<<"\nThere are no record in the list.\n";
+	}
+	else{
+		do{
 		system("cls");
 		cout<<"REPORT: "<<endl<<endl;
 		cout<<"********************************************"<<endl;
@@ -532,9 +570,11 @@ void report()  // view report
 		else
 		{
 		}
-		getch();
 		
 	}while(x != 27);
+	}
+	getch();
+	cout<<"\nPress 'ENTER' return to previous page..."<<endl;
 }
 
 
